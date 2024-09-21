@@ -11,8 +11,8 @@ class NicovideoQueryRun(BaseTool):
     """Tool that adds the capability to search using
     the Nicovideo Snapshot Search API."""
 
-    name = "NicoVideo"
-    description = (
+    name: str = "NicoVideo"
+    description: str = (
         "A wrapper around Nicovideo. "
         "The site is deeply involved in otaku culture. "
         "and can retrieve video titles (title), "

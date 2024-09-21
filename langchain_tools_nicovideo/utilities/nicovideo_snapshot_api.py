@@ -16,7 +16,7 @@ class NicovideoSnapshotApiWrapper(BaseModel):
         valid_query = re.match(r"Search query: (.+)", query)
         if valid_query is None or len(valid_query.groups()) == 0:
             return "Be sure to use the prefix 'Search query: '."
-        response = (
+        request = (
             self.nicovideo_client.keywords()
             .single_query(valid_query.groups()[0])
             .field(
@@ -30,8 +30,8 @@ class NicovideoSnapshotApiWrapper(BaseModel):
             .no_filter()
             .limit(20)
             .user_agent(self.nicovideo_agent_name, "0")
-            .request()
         )
+        response = request.request()
         if response.status()[0] == 200:
             data = response.data()
             if len(data) == 0:
@@ -45,8 +45,10 @@ class NicovideoSnapshotApiWrapper(BaseModel):
             return "Internal Server Error. please retry later."
         elif response.status()[0] == 503:
             return "Service Unavailable (MAINTENANCE). please retry later."
+        else:
+            return f"Unexpected status code was returned: { response.status()[0]}"
 
-    @root_validator()
+    @root_validator(skip_on_failure=True)
     def validate_environment(cls, values: Dict) -> Dict:
         nicovideo_agent_name = get_from_dict_or_env(
             values, "nicovideo_agent_name", "NICOVIDEO_AGENT_NAME"
